@@ -81,7 +81,7 @@ st.markdown("# Investimentos")
 st.divider()
 
 # Display the dataframe and insert a divider
-st.dataframe(investment_df_analysis)
+st.dataframe(investment_df)
 st.divider()
 
 # Insert the chart
