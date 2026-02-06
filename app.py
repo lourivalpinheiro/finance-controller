@@ -58,22 +58,23 @@ else:
     col1, col2 = st.columns(2)
 
     with col1:
-        grafico_barras = px.bar(
-            df_filtrado,
-            x="categoria",
-            y="valor",
-            color="tipo",
-            barmode="group",
-            text="valor",
-            color_discrete_map=cores,
-            title="Receita e Despesa por Categoria",
-            hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
-        )
-        grafico_barras.update_traces(
-            texttemplate="%{text:.2f}",
-            textposition="outside"
-        )
-        st.plotly_chart(grafico_barras, use_container_width=True)
+        with st.container(border=True):
+            grafico_barras = px.bar(
+                df_filtrado,
+                x="categoria",
+                y="valor",
+                color="tipo",
+                barmode="group",
+                text="valor",
+                color_discrete_map=cores,
+                title="Receita e Despesa por Categoria",
+                hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
+            )
+            grafico_barras.update_traces(
+                texttemplate="%{text:.2f}",
+                textposition="outside"
+            )
+            st.plotly_chart(grafico_barras, use_container_width=True)
 
     with col2:
         grafico_pizza = px.pie(
