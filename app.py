@@ -77,17 +77,18 @@ else:
             st.plotly_chart(grafico_barras, use_container_width=True)
 
     with col2:
-        grafico_pizza = px.pie(
-            df_filtrado,
-            names="categoria",
-            values="valor",
-            color="tipo",
-            color_discrete_map=cores,
-            title="Distribuição de Valores",
-            hole=0.4  # transforma em donut
-        )
-        grafico_pizza.update_traces(
-            textinfo="percent+label",
-            hovertemplate="<b>%{label}</b><br>Valor: %{value:,.2f}<br>Percentual: %{percent}"
-        )
-        st.plotly_chart(grafico_pizza, use_container_width=True)
+        with st.container(border=True):
+            grafico_pizza = px.pie(
+                df_filtrado,
+                names="categoria",
+                values="valor",
+                color="tipo",
+                color_discrete_map=cores,
+                title="Distribuição de Valores",
+                hole=0.4  # transforma em donut
+            )
+            grafico_pizza.update_traces(
+                textinfo="percent+label",
+                hovertemplate="<b>%{label}</b><br>Valor: %{value:,.2f}<br>Percentual: %{percent}"
+            )
+            st.plotly_chart(grafico_pizza, use_container_width=True)
