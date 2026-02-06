@@ -22,8 +22,8 @@ with st.spinner("Carregando planilha..."):
 # ======================
 # Converter a coluna de datas de forma robusta
 # ======================
-df["data"] = pd.to_datetime(df["data"], errors="coerce")  # converte qualquer formato reconhecível
-df = df.dropna(subset=["data"])  # remove linhas com datas inválidas
+df["data"] = pd.to_datetime(df["data"], errors="coerce")
+df = df.dropna(subset=["data"])
 
 # ======================
 # Filtro de Tipo
@@ -39,63 +39,74 @@ data_inicial, data_final = st.date_input(
     value=[df["data"].min().date(), df["data"].max().date()]
 )
 
+# ======================
 # Filtra o DataFrame
+# ======================
 df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
 # ======================
-# Cores
+# Verifica se há dados
 # ======================
-cores = {"Receita": "#2ECC71", "Despesa": "#E74C3C"}
+if df_filtrado.empty:
+    st.warning(
+        f"Não há lançamentos para o período selecionado ({data_inicial.strftime('%d/%m/%Y')} a "
+        f"{data_final.strftime('%d/%m/%Y')}). Tente outro intervalo ou tipo de lançamento."
+    )
+else:
+    # ======================
+    # Cores
+    # ======================
+    cores = {"Receita": "#2ECC71", "Despesa": "#E74C3C"}
 
-# ======================
-# Gráfico de Barras (Container)
-# ======================
-with st.container():
-    st.subheader("Receita e Despesa por Categoria")
-    grafico_barras = px.bar(
-        df_filtrado,
-        x="categoria",
-        y="valor",
-        color="tipo",
-        barmode="group",
-        text="valor",
-        color_discrete_map=cores,
-        hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
-    )
-    grafico_barras.update_traces(
-        texttemplate="%{text:.2f}",
-        textposition="outside"
-    )
-    grafico_barras.update_layout(
-        xaxis_title="Categoria",
-        yaxis_title="Valor (R$)",
-        xaxis_tickangle=-45,
-        margin=dict(l=40, r=20, t=40, b=80),
-        legend=dict(title="Tipo", orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(grafico_barras, use_container_width=True)
+    # ======================
+    # Gráfico de Barras (Container)
+    # ======================
+    with st.container():
+        st.subheader("Receita e Despesa por Categoria")
+        grafico_barras = px.bar(
+            df_filtrado,
+            x="categoria",
+            y="valor",
+            color="tipo",
+            barmode="group",
+            text="valor",
+            color_discrete_map=cores,
+            hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
+        )
+        grafico_barras.update_traces(
+            texttemplate="%{text:.2f}",
+            textposition="outside"
+        )
+        grafico_barras.update_layout(
+            xaxis_title="Categoria",
+            yaxis_title="Valor (R$)",
+            xaxis_tickangle=-45,
+            margin=dict(l=40, r=20, t=40, b=80),
+            legend=dict(title="Tipo", orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(grafico_barras, use_container_width=True)
 
-# ======================
-# Gráfico de Pizza (Container)
-# ======================
-with st.container():
-    st.subheader("Distribuição de Valores")
-    grafico_pizza = px.pie(
-        df_filtrado,
-        names="categoria",
-        values="valor",
-        color="tipo",
-        color_discrete_map=cores,
-        hole=0.4
-    )
-    grafico_pizza.update_traces(
-        textinfo="percent+label",
-        hovertemplate="<b>%{label}</b><br>Valor: %{value:,.2f}<br>Percentual: %{percent}",
-        marker=dict(line=dict(color="#000000", width=2))
-    )
-    grafico_pizza.update_layout(
-        legend=dict(title="Tipo", orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
-    )
-    st.plotly_chart(grafico_pizza, use_container_width=True)
+    # ======================
+    # Gráfico de Pizza (Container)
+    # ======================
+    with st.container():
+        st.subheader("Distribuição de Valores")
+        grafico_pizza = px.pie(
+            df_filtrado,
+            names="categoria",
+            values="valor",
+            color="tipo",
+            color_discrete_map=cores,
+            hole=0.4
+        )
+        grafico_pizza.update_traces(
+            textinfo="percent+label",
+            hovertemplate="<b>%{label}</b><br>Valor: %{value:,.2f}<br>Percentual: %{percent}",
+            marker=dict(line=dict(color="#000000", width=2))
+        )
+        grafico_pizza.update_layout(
+            legend=dict(title="Tipo", orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
+        )
+        st.plotly_chart(grafico_pizza, use_container_width=True)
