@@ -19,10 +19,11 @@ with st.spinner("Carregando planilha..."):
     df = conn.read(spreadsheet=SHEET_URL)
 
 # ======================
-# Converter coluna de datas
+# Converter coluna de datas de forma robusta
 # ======================
-df["data"] = pd.to_datetime(df["data"], errors="coerce")
-df = df.dropna(subset=["data"])
+df["data"] = pd.to_datetime(df["data"], errors="coerce")  # converte qualquer formato
+df = df.dropna(subset=["data"])  # remove linhas inválidas
+df["data_somente"] = df["data"].dt.date  # apenas a data, sem hora
 
 # ======================
 # Filtro de tipo
@@ -35,24 +36,24 @@ tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 # ======================
 datas_selecionadas = st.date_input(
     "Selecione o período",
-    value=[df["data"].min().date(), df["data"].max().date()]
+    value=[df["data_somente"].min(), df["data_somente"].max()]
 )
 
-# Desempacotando de forma segura
+# Garantir que seja lista de duas datas
 if isinstance(datas_selecionadas, list) and len(datas_selecionadas) == 2:
     data_inicial, data_final = datas_selecionadas
 else:
     data_inicial = data_final = datas_selecionadas
 
 # ======================
-# Filtra DataFrame
+# Filtra DataFrame de forma segura
 # ======================
-df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
+df_filtrado = df[(df["data_somente"] >= data_inicial) & (df["data_somente"] <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
 # ======================
-# Mensagem amigável caso não haja lançamentos
+# Mensagem amigável se não houver lançamentos
 # ======================
 if df_filtrado.empty:
     st.warning(
