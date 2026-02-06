@@ -32,11 +32,10 @@ tipos_disponiveis = ["Ambos"] + df["tipo"].unique().tolist()
 tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 
 # ======================
-# Filtro de Período (Slider usando datetime.datetime)
+# Filtro de Período (Slider)
 # ======================
-# Garantir datetime.datetime para o slider funcionar no modo intervalo
-data_min = pd.Timestamp(df["data"].min().date())
-data_max = pd.Timestamp(df["data"].max().date())
+data_min = df["data"].min()
+data_max = df["data"].max()
 
 data_inicial, data_final = st.slider(
     "Selecione o período",
@@ -71,6 +70,7 @@ with st.container():
         color_discrete_map=cores,
         hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
     )
+    # Barras lisas
     grafico_barras.update_traces(
         texttemplate="%{text:.2f}",
         textposition="outside"
@@ -95,7 +95,7 @@ with st.container():
         values="valor",
         color="tipo",
         color_discrete_map=cores,
-        hole=0.4
+        hole=0.4  # Donut chart
     )
     grafico_pizza.update_traces(
         textinfo="percent+label",
