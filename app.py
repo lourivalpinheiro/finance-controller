@@ -8,15 +8,6 @@ from streamlit_gsheets import GSheetsConnection
 # ======================
 st.set_page_config(page_title="Dashboard Financeiro", layout="wide")
 
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
-
 st.title("Lourival Pinheiro")
 
 # ======================
@@ -28,8 +19,8 @@ with st.spinner("Carregando planilha..."):
     conn = st.connection("gsheets", type=GSheetsConnection)
     df = conn.read(spreadsheet=SHEET_URL)
 
-# Converte a coluna de datas
-df["data"] = pd.to_datetime(df["data"])
+# Converte a coluna de datas para datetime
+df["data"] = pd.to_datetime(df["data"], format="%Y/%m/%d")
 
 # ======================
 # Filtro de Tipo
@@ -40,9 +31,8 @@ tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 # ======================
 # Filtro de Período (Slider)
 # ======================
-# Converte para datetime.date, que é compatível com st.slider
-data_min = df["data"].min().date()
-data_max = df["data"].max().date()
+data_min = df["data"].min()
+data_max = df["data"].max()
 
 data_inicial, data_final = st.slider(
     "Selecione o período",
@@ -52,8 +42,8 @@ data_inicial, data_final = st.slider(
     format="DD/MM/YYYY"
 )
 
-# Filtra o DataFrame usando .dt.date
-df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
+# Filtra o DataFrame
+df_filtrado = df[(df["data"] >= data_inicial) & (df["data"] <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
