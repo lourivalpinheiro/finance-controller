@@ -32,22 +32,15 @@ tipos_disponiveis = ["Ambos"] + df["tipo"].unique().tolist()
 tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 
 # ======================
-# Filtro de Período (Slider usando datetime.datetime)
+# Filtro de Período (date_input)
 # ======================
-# Garantir datetime.datetime para o slider funcionar no modo intervalo
-data_min = pd.Timestamp(df["data"].min().date())
-data_max = pd.Timestamp(df["data"].max().date())
-
-data_inicial, data_final = st.slider(
+data_inicial, data_final = st.date_input(
     "Selecione o período",
-    min_value=data_min,
-    max_value=data_max,
-    value=(data_min, data_max),
-    format="DD/MM/YYYY"
+    value=[df["data"].min().date(), df["data"].max().date()]
 )
 
 # Filtra o DataFrame
-df_filtrado = df[(df["data"] >= data_inicial) & (df["data"] <= data_final)]
+df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
