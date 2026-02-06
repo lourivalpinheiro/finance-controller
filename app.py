@@ -46,7 +46,8 @@ tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 
 data_inicial, data_final = st.date_input(
     "Selecione o período",
-    value=[df["data"].min(), df["data"].max()]
+    value=[df["data"].min(), df["data"].max()],
+    format="DD/MM/YYYY"
 )
 
 df_filtrado = df[(df["data"] >= pd.to_datetime(data_inicial)) & (df["data"] <= pd.to_datetime(data_final))]
