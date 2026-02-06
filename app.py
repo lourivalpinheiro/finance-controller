@@ -19,8 +19,11 @@ with st.spinner("Carregando planilha..."):
     conn = st.connection("gsheets", type=GSheetsConnection)
     df = conn.read(spreadsheet=SHEET_URL)
 
-# Converte a coluna de datas para datetime
-df["data"] = pd.to_datetime(df["data"], format="%Y/%m/%d")
+# ======================
+# Converter a coluna de datas de forma robusta
+# ======================
+df["data"] = pd.to_datetime(df["data"], errors="coerce")  # converte qualquer formato reconhecível
+df = df.dropna(subset=["data"])  # remove linhas com datas inválidas
 
 # ======================
 # Filtro de Tipo
