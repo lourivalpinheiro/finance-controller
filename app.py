@@ -32,21 +32,20 @@ tipos_disponiveis = ["Ambos"] + df["tipo"].unique().tolist()
 tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 
 # ======================
-# Filtro de Período (Slider)
+# Filtro de Período (Slider usando datetime.date)
 # ======================
-data_min = df["data"].min()
-data_max = df["data"].max()
+data_min = df["data"].min().date()
+data_max = df["data"].max().date()
 
 data_inicial, data_final = st.slider(
     "Selecione o período",
     min_value=data_min,
     max_value=data_max,
-    value=(data_min, data_max),
-    format="DD/MM/YYYY"
+    value=(data_min, data_max)
 )
 
-# Filtra o DataFrame
-df_filtrado = df[(df["data"] >= data_inicial) & (df["data"] <= data_final)]
+# Filtra o DataFrame usando .dt.date
+df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
@@ -70,7 +69,6 @@ with st.container():
         color_discrete_map=cores,
         hover_data={"valor": ":,.2f", "tipo": True, "categoria": True}
     )
-    # Barras lisas
     grafico_barras.update_traces(
         texttemplate="%{text:.2f}",
         textposition="outside"
@@ -95,7 +93,7 @@ with st.container():
         values="valor",
         color="tipo",
         color_discrete_map=cores,
-        hole=0.4  # Donut chart
+        hole=0.4
     )
     grafico_pizza.update_traces(
         textinfo="percent+label",
