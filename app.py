@@ -7,7 +7,6 @@ from streamlit_gsheets import GSheetsConnection
 # Configurações Streamlit
 # ======================
 st.set_page_config(page_title="Dashboard Financeiro", layout="wide")
-
 st.title("Lourival Pinheiro")
 
 # ======================
@@ -20,39 +19,46 @@ with st.spinner("Carregando planilha..."):
     df = conn.read(spreadsheet=SHEET_URL)
 
 # ======================
-# Converter a coluna de datas de forma robusta
+# Converter coluna de datas
 # ======================
 df["data"] = pd.to_datetime(df["data"], errors="coerce")
 df = df.dropna(subset=["data"])
 
 # ======================
-# Filtro de Tipo
+# Filtro de tipo
 # ======================
 tipos_disponiveis = ["Ambos"] + df["tipo"].unique().tolist()
 tipo_selecionado = st.selectbox("Selecione o tipo", tipos_disponiveis)
 
 # ======================
-# Filtro de Período (date_input)
+# Filtro de período com date_input seguro
 # ======================
-data_inicial, data_final = st.date_input(
+datas_selecionadas = st.date_input(
     "Selecione o período",
     value=[df["data"].min().date(), df["data"].max().date()]
 )
 
+# Desempacotando de forma segura
+if isinstance(datas_selecionadas, list) and len(datas_selecionadas) == 2:
+    data_inicial, data_final = datas_selecionadas
+else:
+    data_inicial = data_final = datas_selecionadas
+
 # ======================
-# Filtra o DataFrame
+# Filtra DataFrame
 # ======================
 df_filtrado = df[(df["data"].dt.date >= data_inicial) & (df["data"].dt.date <= data_final)]
 if tipo_selecionado != "Ambos":
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_selecionado]
 
 # ======================
-# Verifica se há dados
+# Mensagem amigável caso não haja lançamentos
 # ======================
 if df_filtrado.empty:
     st.warning(
-        f"Não há lançamentos para o período selecionado ({data_inicial.strftime('%d/%m/%Y')} a "
-        f"{data_final.strftime('%d/%m/%Y')}). Tente outro intervalo ou tipo de lançamento."
+        f"Não há lançamentos para o período selecionado "
+        f"({data_inicial.strftime('%d/%m/%Y')} a {data_final.strftime('%d/%m/%Y')}). "
+        "Tente outro intervalo ou tipo de lançamento."
     )
 else:
     # ======================
@@ -61,7 +67,7 @@ else:
     cores = {"Receita": "#2ECC71", "Despesa": "#E74C3C"}
 
     # ======================
-    # Gráfico de Barras (Container)
+    # Gráfico de Barras
     # ======================
     with st.container():
         st.subheader("Receita e Despesa por Categoria")
@@ -89,7 +95,7 @@ else:
         st.plotly_chart(grafico_barras, use_container_width=True)
 
     # ======================
-    # Gráfico de Pizza (Container)
+    # Gráfico de Pizza
     # ======================
     with st.container():
         st.subheader("Distribuição de Valores")
